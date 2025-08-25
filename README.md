@@ -35,18 +35,17 @@ Before you begin, ensure you have the following installed and running:
 
 ---
 
-### 🧰 Redis
+###  Redis
 - **Storage**: Keeps balances keyed per user, e.g. `user:{id}:balance:BTC`.  
 - **Events (Pub/Sub)**: Publishes transaction events into Redis channels:
   - `auth:login:success`
   - `deposit:success`, `deposit:failed`
   - `withdraw:success`, `withdraw:failed`  
 
-📌 **Note:** Only publishing is implemented. Consumers/listeners are **out of scope**.
 
 ---
 
-### ⏱️ Temporal SDK (TypeScript)
+###  Temporal SDK (TypeScript)
 - Orchestrates **deterministic transaction workflows**.  
 - Implements **`ProcessTransactionWorkflow`** with built-in retries and cancellation handling.  
 - Activities:
@@ -72,7 +71,7 @@ Before you begin, ensure you have the following installed and running:
 
 ---
 
-### 📝 Audit Logs & Tracing
+###  Audit Logs & Tracing
 - Each API request and workflow execution produces structured logs.  
 - Events include:
   - User logins
