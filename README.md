@@ -182,12 +182,8 @@ curl -X POST http://localhost:3000/api/auth/register \
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "User registered successfully",
-  "data": {
-    "id": "user_123",
-    "email": "mishary@gmail.com"
-  }
+    "message": "Registration successful",
+    "userId": "54b21eec-ef6d-4fc3-bd88-df3ef6120609"
 }
 ```
 
@@ -212,15 +208,8 @@ curl -X POST http://localhost:3000/api/auth/login \
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "user_123",
-      "email": "mishary@gmail.com"
-    }
-  }
+    "message": "Login successful",
+    "token": "example"
 }
 ```
 
