@@ -316,6 +316,34 @@ curl -X GET http://localhost:3000/api/transactions/workflowId:deposit_workflow_a
 
 ---
 
+## Important Notes
+
+### Docker Limitations
+
+**The Docker files in this project (`Dockerfile.express` and `Dockerfile.worker`) are provided for reference but will NOT work properly when running the containers.** Here's why:
+
+1. **Temporal Server Dependency**: The Express API and Temporal Worker containers require a running Temporal Server to function properly. The Docker setup does not include the Temporal Server.
+
+2. **Redis Connection Issues**: Both containers need to connect to Redis, but the Docker configuration doesn't establish proper networking between containers.
+
+3. **Complex Networking Issues**: Even when using a proper `docker-compose.yml` with Temporal Server image, there are persistent networking issues between the Express API, Temporal Worker, and Temporal Server containers that make the setup unreliable.
+
+4. **Port Conflicts**: The containers may have port conflicts with your local development environment.
+
+### If You Want to Use Docker
+
+To make Docker work, you would need to:
+
+1. **Add Temporal Server** to your Docker setup
+2. **Add Redis** container with proper networking
+3. **Create a proper `docker-compose.yml`** file
+4. **Configure environment variables** for inter-service communication
+5. **Set up proper networking** between containers
+
+**Recommendation**: For ease of use and reliability, stick with the local development setup using `npm run start:dev` and `npm run worker:dev`.
+
+---
+
 ## Development
 
 ### Available Scripts
