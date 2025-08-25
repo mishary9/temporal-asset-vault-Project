@@ -1,123 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temporal Asset Vault - README</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            line-height: 1.6;
-            color: #333;
-            background-color: #fdfdfd;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 25px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        h1, h2, h3 {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-top: 24px;
-        }
-        h1 {
-            font-size: 2.2em;
-        }
-        h2 {
-            font-size: 1.8em;
-        }
-        code {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            background-color: #f6f8fa;
-            padding: 0.2em 0.4em;
-            margin: 0;
-            font-size: 85%;
-            border-radius: 3px;
-        }
-        pre {
-            background-color: #f6f8fa;
-            padding: 16px;
-            overflow: auto;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        pre code {
-            padding: 0;
-            font-size: 100%;
-            background-color: transparent;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f6f8fa;
-            font-weight: 600;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
-<body>
+#  Temporal Asset Vault
 
-    <div class="container">
-        <h1>🔐 Temporal Asset Vault</h1>
-        <p>
-            This project is a backend system that simulates a digital asset vault. It uses <strong>Temporal</strong> for orchestrating transaction workflows, <strong>Redis</strong> for data storage and messaging, and a <strong>Node.js/Express</strong> API built with TypeScript.
-        </p>
+This project is a backend system that simulates a digital asset vault.  
+It uses **Temporal** for orchestrating transaction workflows, **Redis** for data storage and messaging, and a **Node.js/Express** API built with TypeScript.
 
-        <hr>
+---
 
-        <h2>🚀 Prerequisites</h2>
-        <p>Before you begin, ensure you have the following installed and running:</p>
-        <ul>
-            <li><strong>Node.js:</strong> Version <code>v16.20.2</code> or higher is recommended.</li>
-            <li><strong>Temporal Server:</strong> The workflow engine must be running.</li>
-            <li><strong>Redis:</strong> The Redis database server must be running.</li>
-        </ul>
-        <p><em><strong>Note:</strong> The easiest way to run the required services is by using the provided Docker Compose setup.</em></p>
-        
-        <hr>
+##  Prerequisites
 
-        <h2>⚙️ Running the Application</h2>
-        
-        <h3>Using Docker Compose (Recommended)</h3>
-        <p>This method will start the API, the Temporal Worker, the Temporal Server, and Redis all at once.</p>
-        <ol>
-            <li>Ensure you have Docker and Docker Compose installed.</li>
-            <li>From the project root, run the following command:</li>
-        </ol>
-        <pre><code>docker-compose up --build</code></pre>
-        
-        <h3>Manual Local Setup</h3>
-        <p>If you prefer to run the services manually on your local machine:</p>
-        <ol>
-            <li>Make sure you have a local instance of the <strong>Temporal Server</strong> and <strong>Redis</strong> running.</li>
-            <li>Navigate to the project's root folder: <code>cd temporal-asset-vault</code></li>
-            <li>Install all required dependencies: <pre><code>npm install</code></pre></li>
-            <li>In one terminal window, start the API server: <pre><code>npm run start:dev</code></pre></li>
-            <li>Open a <strong>second terminal window</strong> and start the Temporal worker: <pre><code>npm run worker:dev</code></pre></li>
-        </ol>
-        
-        <hr>
+Before you begin, ensure you have the following installed and running:
 
-        <h2>📁 Project Structure</h2>
-        <p>The project is organized with a clear separation of concerns to enhance maintainability and scalability.</p>
-        <pre><code>temporal-asset-vault/
+- **Node.js:** Version `v16.20.2` or higher is recommended.  
+- **Temporal Server:** The workflow engine must be running.  
+- **Redis:** The Redis database server must be running.  
+
+
+---
+
+## ⚙️ Implementation Details
+
+### 🖥️ Express.js
+- Provides a RESTful API for authentication, asset management, and transaction tracking.  
+- Routes under `/api` expose endpoints for `auth`, `assets`, and `transactions`.  
+- Controllers handle request validation, forward commands to Temporal Workflows, and return responses.
+
+---
+
+### 📘 TypeScript (Required)
+- Enforced project-wide via `tsconfig.json`.  
+- All APIs use **DTOs (Data Transfer Objects)** for input validation.  
+- **Generics, types, and enums** ensure strong typing, e.g.:
+  - `enum TransactionStatus { PENDING, SUCCESS, FAILED }`
+  - `type AssetSymbol = "BTC" | "ETH" | "USD"`
+  - Generics used for reusable service logic.
+
+---
+
+### 🧰 Redis
+- **Storage**: Keeps balances keyed per user, e.g. `user:{id}:balance:BTC`.  
+- **Events (Pub/Sub)**: Publishes transaction events into Redis channels:
+  - `auth:login:success`
+  - `deposit:success`, `deposit:failed`
+  - `withdraw:success`, `withdraw:failed`  
+
+📌 **Note:** Only publishing is implemented. Consumers/listeners are **out of scope**.
+
+---
+
+### ⏱️ Temporal SDK (TypeScript)
+- Orchestrates **deterministic transaction workflows**.  
+- Implements **`ProcessTransactionWorkflow`** with built-in retries and cancellation handling.  
+- Activities:
+  1. `validateInputActivity` → Ensures request body is valid.  
+  2. `updateBalanceActivity` → Checks/updates balance in Redis.  
+  3. `publishEventActivity` → Publishes success/failure events to Redis.  
+- Supports simulated **latency** (`sleep(5000)`) for long-running operations.  
+- Handles **workflow retries** on transient errors.  
+- Supports **workflow cancellation** for aborted transactions.
+
+---
+
+### Testing (Jest)
+- Unit tests for services, DTOs, and workflow activities.  
+- API integration tests for `/auth`, `/assets`, `/transactions`.  
+- Mock Redis and Temporal for isolated tests.
+
+---
+
+### ESLint + Prettier
+- Enforces code style consistency and catches TypeScript errors early.  
+- Configured for `airbnb-base` style with TypeScript support.
+
+---
+
+### 📝 Audit Logs & Tracing
+- Each API request and workflow execution produces structured logs.  
+- Events include:
+  - User logins
+  - Transaction start/end
+  - Workflow retries or failures  
+
+---
+
+###  Multi-User Support
+- Authentication via **JWT tokens**.  
+- User-specific balances in Redis (e.g., `user:123:balance:BTC`).  
+- Prevents cross-user data leakage.
+---
+
+
+## Manual Local Setup
+
+Make sure you have a local instance of the Temporal Server and Redis running.
+
+Navigate to the project's root folder:
+```bash
+cd temporal-asset-vault
+
+
+Install all required dependencies:
+```bash
+npm install
+
+In one terminal window, start the API server:
+```bash
+npm run start:dev
+
+
+Open a second terminal window and start the Temporal worker:
+```bash
+npm run worker:dev
+---
+
+
+## Project Structure
+
+The project is organized with a clear separation of concerns to enhance maintainability and scalability.
+```perl
+temporal-asset-vault/
 ├── .gitignore
 ├── docker-compose.yml
 ├── Dockerfile
@@ -134,90 +133,25 @@
     ├── config/         # Environment configuration
     ├── dtos/           # Data Transfer Objects for validation
     └── index.ts        # Main application entry point
-</code></pre>
-        
-        <hr>
+---
+## API Endpoints
+All API routes are prefixed with /api.
 
-        <h2>🌐 API Endpoints</h2>
-        <p>All API routes are prefixed with <code>/api</code>.</p>
-        
-        <h3>Authentication Routes</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Endpoint</th>
-                    <th>Method</th>
-                    <th>Description</th>
-                    <th>Request Body</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>/auth/register</code></td>
-                    <td>POST</td>
-                    <td>Registers a new user.</td>
-                    <td><code>{ "email": "string", "password": "string" }</code></td>
-                </tr>
-                <tr>
-                    <td><code>/auth/login</code></td>
-                    <td>POST</td>
-                    <td>Logs in a user and returns a JWT token.</td>
-                    <td><code>{ "email": "string", "password": "string" }</code></td>
-                </tr>
-            </tbody>
-        </table>
+### Authentication Routes
+/auth/register	POST	Registers a new user	{ "email": "string", "password": "string" }
+/auth/login	POST	Logs in a user, returns JWT	{ "email": "string", "password": "string" }
 
-        <h3>Assets Routes</h3>
-        <p>These routes require a valid JWT `Bearer` token in the `Authorization` header.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Endpoint</th>
-                    <th>Method</th>
-                    <th>Description</th>
-                    <th>Request Body</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>/assets</code></td>
-                    <td>GET</td>
-                    <td>Fetches all asset balances for the user.</td>
-                    <td><em>None</em></td>
-                </tr>
-                <tr>
-                    <td><code>/assets/deposit</code></td>
-                    <td>POST</td>
-                    <td>Starts a Temporal workflow to deposit an asset.</td>
-                    <td><code>{ "symbol": "string", "amount": number }</code></td>
-                </tr>
-                <tr>
-                    <td><code>/assets/withdraw</code></td>
-                    <td>POST</td>
-                    <td>Starts a Temporal workflow to withdraw an asset.</td>
-                    <td><code>{ "symbol": "string", "amount": number }</code></td>
-                </tr>
-            </tbody>
-        </table>
+### Assets Routes
 
-        <h3>Transaction Routes</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Endpoint</th>
-                    <th>Method</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>/transactions/:workflowId</code></td>
-                    <td>GET</td>
-                    <td>Gets the current status of a transaction workflow.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+These routes require a valid JWT Bearer token in the Authorization header.
 
-</body>
-</html>
+/assets	GET	Fetches all asset balances for the user	None
+/assets/deposit	POST	Starts a Temporal workflow to deposit asset	{ "symbol": "string", "amount": number }
+/assets/withdraw	POST	Starts a Temporal workflow to withdraw asset	{ "symbol": "string", "amount": number }
+
+### Transaction Routes
+/transactions/:workflowId	GET	Gets the current status of a transaction workflow
+---
+
+Assumbtions :
+
