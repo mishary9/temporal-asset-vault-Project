@@ -157,14 +157,173 @@ All API routes are prefixed with `/api`.
 
 ---
 
+## API Request Examples
+
+### Authentication Examples
+
+#### 1. User Registration
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "mishary@gmail.com",
+    "password": "1234"
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "email": "mishary@gmail.com",
+  "password": "1234"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "id": "user_123",
+    "email": "mishary@gmail.com"
+  }
+}
+```
+
+#### 2. User Login
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "mishary@gmail.com",
+    "password": "1234"
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "email": "mishary@gmail.com",
+  "password": "1234"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "user_123",
+      "email": "mishary@gmail.com"
+    }
+  }
+}
+```
+
+### Asset Management Examples
+
+#### 3. Get User Assets (Requires JWT)
+```bash
+curl -X GET http://localhost:3000/api/assets \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Response:**
+```json
+{
+    "assets": [
+        {
+            "symbol": "BTC",
+            "balance": "0.20"
+        }
+    ],
+    "message": "Assets fetched successfully"
+}
+```
+
+#### 4. Deposit Asset (Requires JWT)
+```bash
+curl -X POST http://localhost:3000/api/assets/deposit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "symbol": "BTC",
+    "amount": 0.1
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "symbol": "BTC",
+  "amount": 0.1
+}
+```
+
+**Response:**
+```json
+{
+    "message": "Deposit process initiated.",
+    "workflowId": "transaction-66b83ab9-ff5b-4283-9704-a775abb696ff"
+}
+```
+
+#### 5. Withdraw Asset (Requires JWT)
+```bash
+curl -X POST http://localhost:3000/api/assets/withdraw \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "symbol": "ETH",
+    "amount": 0.5
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "symbol": "ETH",
+  "amount": 0.5
+}
+```
+
+**Response:**
+```json
+{
+    "message": "Withdrawal process initiated.",
+    "workflowId": "transaction-66b83ab9-ff5b-4283-9704-a775abb696ff"
+}
+```
+
+### Transaction Status Examples
+
+#### 6. Get Transaction Status (Requires JWT)
+```bash
+curl -X GET http://localhost:3000/api/transactions/workflowId:deposit_workflow_abc123 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Response:**
+```json
+{
+    "status": "completed",
+    "message": "withdraw Succeeded"
+}
+```
+
+---
+
 ## Assumptions
 
 - Temporal Server and Redis are running and accessible
-- JWT tokens are used for authentication
-- Asset symbols are limited to common cryptocurrencies (BTC, ETH, USD)
-- Transaction workflows are long-running and may take several seconds
-- Redis is used for both data storage and event publishing
-- The system is designed for demonstration/learning purposes
+- Authentication header must be included in all the request to assets or transsactions
+- Asset symbols and balance both are String type to ensure consistanty
+- Transaction workflows are long-running and may take several seconds (30sec)
+- Redis is used for both data storage and event publishing 
 
 ---
 
@@ -187,12 +346,5 @@ All API routes are prefixed with `/api`.
 
 
 ---
-
-## Contributing
-
-1. Ensure all tests pass
-2. Follow the established code style (ESLint + Prettier)
-3. Add tests for new functionality
-4. Update documentation as needed
 
 
