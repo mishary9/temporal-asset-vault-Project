@@ -1,6 +1,5 @@
 
-FROM node:16.20.2-alpine
-
+FROM node:18-bullseye
 
 WORKDIR /app
 
@@ -13,6 +12,12 @@ RUN npm install
 
 COPY src/ ./src/
 
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-CMD ["npm", "run", "worker:dev"]
+RUN npm run build
+
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
+CMD ["npm", "run", "worker"]
+
 

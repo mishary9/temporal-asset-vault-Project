@@ -24,7 +24,7 @@ async function startApiServer() {
   app.use('/api/assets', assetsRoutes);
   app.use('/api/', transactionRoutes);
 
-  const port: number = parseInt(process.env.PORT || '3000');
+  const port: number = parseInt(process.env.EXPRESS_APP_PORT || '3000');
   app.listen(port, () => {
     console.log(` API Server is running on port ${port}`);
   });
