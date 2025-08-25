@@ -16,16 +16,16 @@ Before you begin, ensure you have the following installed and running:
 
 ---
 
-## ⚙️ Implementation Details
+##  Implementation Details
 
-### 🖥️ Express.js
+###  Express.js
 - Provides a RESTful API for authentication, asset management, and transaction tracking.  
 - Routes under `/api` expose endpoints for `auth`, `assets`, and `transactions`.  
 - Controllers handle request validation, forward commands to Temporal Workflows, and return responses.
 
 ---
 
-### 📘 TypeScript (Required)
+### TypeScript (Required)
 - Enforced project-wide via `tsconfig.json`.  
 - All APIs use **DTOs (Data Transfer Objects)** for input validation.  
 - **Generics, types, and enums** ensure strong typing, e.g.:
@@ -95,31 +95,33 @@ Make sure you have a local instance of the Temporal Server and Redis running.
 Navigate to the project's root folder:
 ```bash
 cd temporal-asset-vault
-
+```
 
 Install all required dependencies:
 ```bash
 npm install
+```
 
 In one terminal window, start the API server:
 ```bash
 npm run start:dev
-
+```
 
 Open a second terminal window and start the Temporal worker:
 ```bash
 npm run worker:dev
----
+```
 
+---
 
 ## Project Structure
 
 The project is organized with a clear separation of concerns to enhance maintainability and scalability.
-```perl
+```
 temporal-asset-vault/
 ├── .gitignore
-├── docker-compose.yml
-├── Dockerfile
+├── Dockerfile.express
+├── Dockerfile.worker
 ├── jest.config.js
 ├── package-lock.json
 ├── package.json
@@ -127,31 +129,71 @@ temporal-asset-vault/
 ├── node_modules/       # Managed by NPM
 ├── dist/               # Compiled TypeScript output
 └── src/                # Application source code
-    ├── api/            # Express server, routes, controllers
-    ├── temporal/       # Workflows, activities, and worker
-    ├── services/       # Shared business logic (Redis, etc.)
-    ├── config/         # Environment configuration
+    ├── __test__/       # Test files
+    ├── db/             # Database connections (Redis)
     ├── dtos/           # Data Transfer Objects for validation
-    └── index.ts        # Main application entry point
+    ├── handlers/       # Request handlers and business logic
+    ├── models/         # Data models and types
+    ├── routes/         # Express route definitions
+    └── temporal/       # Workflows, activities, and worker
+    └── index.ts   
+```
+
 ---
+
 ## API Endpoints
-All API routes are prefixed with /api.
 
-### Authentication Routes
-/auth/register	POST	Registers a new user	{ "email": "string", "password": "string" }
-/auth/login	POST	Logs in a user, returns JWT	{ "email": "string", "password": "string" }
+All API routes are prefixed with `/api`.
 
-### Assets Routes
+| Endpoint | Method | Description | Request Body |
+|----------|--------|-------------|--------------|
+| `/auth/register` | POST | Registers a new user | `{ "email": "string", "password": "string" }` |
+| `/auth/login` | POST | Logs in a user, returns JWT | `{ "email": "string", "password": "string" }` |
+| `/assets` | GET | Fetches all asset balances for the user | None (requires JWT) |
+| `/assets/deposit` | POST | Starts a Temporal workflow to deposit asset | `{ "symbol": "string", "amount": number }` |
+| `/assets/withdraw` | POST | Starts a Temporal workflow to withdraw asset | `{ "symbol": "string", "amount": number }` |
+| `/transactions/:workflowId` | GET | Gets the current status of a transaction workflow | None (requires JWT) |
 
-These routes require a valid JWT Bearer token in the Authorization header.
+**Note:** All asset and transaction routes require a valid JWT Bearer token in the Authorization header.
 
-/assets	GET	Fetches all asset balances for the user	None
-/assets/deposit	POST	Starts a Temporal workflow to deposit asset	{ "symbol": "string", "amount": number }
-/assets/withdraw	POST	Starts a Temporal workflow to withdraw asset	{ "symbol": "string", "amount": number }
-
-### Transaction Routes
-/transactions/:workflowId	GET	Gets the current status of a transaction workflow
 ---
 
-Assumbtions :
+## Assumptions
+
+- Temporal Server and Redis are running and accessible
+- JWT tokens are used for authentication
+- Asset symbols are limited to common cryptocurrencies (BTC, ETH, USD)
+- Transaction workflows are long-running and may take several seconds
+- Redis is used for both data storage and event publishing
+- The system is designed for demonstration/learning purposes
+
+---
+
+## Development
+
+### Available Scripts
+
+- `npm run start:dev` - Start the development server
+- `npm run worker:dev` - Start the Temporal worker
+- `npm run build` - Build the TypeScript project
+- `npm run test` - Run tests
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+
+
+• Express API: http://localhost:3000
+* Temporal Web UI: http://localhost:8088
+* Redis: localhost:6379
+* Temporal Server: localhost:7233
+
+
+---
+
+## Contributing
+
+1. Ensure all tests pass
+2. Follow the established code style (ESLint + Prettier)
+3. Add tests for new functionality
+4. Update documentation as needed
+
 
